@@ -95,9 +95,8 @@
 
 <section class="section">
     <div class="sidenav px-5">
-<!--        ///////////////////////////////////-->
-<!--        filter section for job seekers-->
-<!--        //////////////////////////////////-->
+
+
         <div sec:authorize="hasAuthority('Job Seeker')">
 
             <label class="text-uppercase color-dull font-weight-bold">Filter Results</label>
@@ -234,14 +233,11 @@
                 <input id="hidLoc" name="location" th:value="${location}" hidden>
             </form>
         </div>
-<!--///////////////////////////////////////////////////////////////////////////////////////////////-->
+
 
 
     </div>
     <article>
-<!--        ///////////////////////////////////////////////////////-->
-<!--        reference to candidate dashboard-->
-<!--        /////////////////////////////////////////////////////-->
 
         <div class="box" sec:authorize="hasAuthority('Job Seeker')">
             <h1 class="primary-title">Candidate Dashboard</h1>
@@ -253,7 +249,7 @@
             </div>
         </div>
 
-<!--        ///////////////////////////////////////////////////////-->
+
         <div class="box" sec:authorize="hasAuthority('Recruiter')">
             <h1 class="primary-title">Recruiter Dashboard</h1>
         </div>

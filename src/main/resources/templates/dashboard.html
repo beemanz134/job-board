@@ -71,6 +71,16 @@
             </li>
 
         </ul>
+        <img
+                class="rounded-circle me-3"
+                height="50px"
+                width="50x"
+                alt="profile image"
+
+                th:if="${user.photosImagePath!=null}"
+                th:src="@{${user?.photosImagePath}}"
+        />
+
         <label th:if="${user.firstName != null && user.lastName != null}"
                th:text="${user.firstName+' '+user.lastName}"
                class="nav-item nav-link px-2 me-3">
@@ -85,6 +95,7 @@
 
 <section class="section">
     <div class="sidenav px-5">
+
 
         <div sec:authorize="hasAuthority('Job Seeker')">
 
@@ -223,6 +234,8 @@
             </form>
         </div>
 
+
+
     </div>
     <article>
 
@@ -236,6 +249,7 @@
             </div>
         </div>
 
+
         <div class="box" sec:authorize="hasAuthority('Recruiter')">
             <h1 class="primary-title">Recruiter Dashboard</h1>
         </div>
@@ -247,7 +261,7 @@
                         style="text-decoration: none; color: black"
                 >
                     <div
-                            onclick="window.location.href = '/job-details-apply/' + [[$,{jobPost,jobPostId}]]"
+                            onclick="window.location='/job-details-apply/{id}(id=${jobPost.jobPostId})'"
                             class="job-row"
                     >
                         <div class="row">
@@ -257,9 +271,8 @@
                                     <span
                                             class="title-span"
                                             sec:authorize="hasAuthority('Recruiter')"
-                                            th:inline="text '(' + ${jobPost.totalCandidates} + ' Candidates Applied)'"
-                                    >
-                                        (xx candidates applied)</span>
+                                            th:text="'(' + ${jobPost.totalCandidates} + ' Candidates Applied)'"
+                                    >(xx candidates applied)</span
                                     >
                                     <span
                                             class="title-span"

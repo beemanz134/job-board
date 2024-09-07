@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+
 @Controller
 public class JobPostActivityController {
 
@@ -53,21 +54,23 @@ public class JobPostActivityController {
                              @RequestParam(value = "remoteOnly", required = false) String remoteOnly,
                              @RequestParam(value = "officeOnly", required = false) String officeOnly,
                              @RequestParam(value = "partialRemote", required = false) String partialRemote,
-                             @RequestParam(value = "postedToday", required = false) boolean postedToday,
-                             @RequestParam(value = "postedWeek", required = false) boolean postedWeek,
-                             @RequestParam(value = "postedMonth", required = false) boolean postedMonth
+                             @RequestParam(value = "today", required = false) boolean today,
+                             @RequestParam(value = "days7", required = false) boolean days7,
+                             @RequestParam(value = "days30", required = false) boolean days30
+
     ) {
+
         model.addAttribute("partTime", Objects.equals(partTime, "Part-Time"));
-        model.addAttribute("fullTime", Objects.equals(fullTime, "Full-Time"));
-        model.addAttribute("freelance", Objects.equals(freelance, "FreeLance"));
+        model.addAttribute("fullTime", Objects.equals(partTime, "Full-Time"));
+        model.addAttribute("freelance", Objects.equals(partTime, "Freelance"));
 
-        model.addAttribute("remoteOnly", Objects.equals(remoteOnly, "Remote-Only"));
-        model.addAttribute("officeOnly", Objects.equals(officeOnly, "Office-Only"));
-        model.addAttribute("partialRemote", Objects.equals(partialRemote, "Partial-Only"));
+        model.addAttribute("remoteOnly", Objects.equals(partTime, "Remote-Only"));
+        model.addAttribute("officeOnly", Objects.equals(partTime, "Office-Only"));
+        model.addAttribute("partialRemote", Objects.equals(partTime, "Partial-Remote"));
 
-        model.addAttribute("postedToday", postedToday);
-        model.addAttribute("postedWeek", postedWeek);
-        model.addAttribute("postedMonth", postedMonth);
+        model.addAttribute("today", today);
+        model.addAttribute("days7", days7);
+        model.addAttribute("days30", days30);
 
         model.addAttribute("job", job);
         model.addAttribute("location", location);
@@ -78,31 +81,31 @@ public class JobPostActivityController {
         boolean remote = true;
         boolean type = true;
 
-        if(postedMonth) {
-            searchDate = LocalDate.now().minusDays( 30);
-        } else if (postedWeek){
+        if (days30) {
+            searchDate = LocalDate.now().minusDays(30);
+        } else if (days7) {
             searchDate = LocalDate.now().minusDays(7);
-        } else if (postedToday) {
+        } else if (today) {
             searchDate = LocalDate.now();
         } else {
             dateSearchFlag = false;
         }
 
-        if(partTime == null && fullTime == null && freelance == null){
+        if (partTime == null && fullTime == null && freelance == null) {
             partTime = "Part-Time";
             fullTime = "Full-Time";
-            freelance = "FreeLance";
+            freelance = "Freelance";
             remote = false;
         }
 
-        if(officeOnly == null && remoteOnly == null && partialRemote == null){
+        if (officeOnly == null && remoteOnly == null && partialRemote == null) {
             officeOnly = "Office-Only";
             remoteOnly = "Remote-Only";
-            partialRemote = "partial-Remote";
-            type=false;
+            partialRemote = "Partial-Remote";
+            type = false;
         }
 
-        if(!dateSearchFlag && !remote && type && !StringUtils.hasText(job) && !StringUtils.hasText(location)){
+        if (!dateSearchFlag && !remote && !type && !StringUtils.hasText(job) && !StringUtils.hasText(location)) {
             jobPost = jobPostActivityService.getAll();
         } else {
             jobPost = jobPostActivityService.search(job, location, Arrays.asList(partTime, fullTime, freelance),
@@ -125,32 +128,34 @@ public class JobPostActivityController {
                 boolean exist;
                 boolean saved;
 
-                for (JobPostActivity jobActivity : jobPost){
+                for (JobPostActivity jobActivity : jobPost) {
                     exist = false;
                     saved = false;
-                    for (JobSeekerApply jobSeekerApply : jobSeekerApplyList){
-                        if (Objects.equals(jobActivity.getJobPostId(), jobSeekerApply.getJob().getJobPostId())){
+                    for (JobSeekerApply jobSeekerApply : jobSeekerApplyList) {
+                        if (Objects.equals(jobActivity.getJobPostId(), jobSeekerApply.getJob().getJobPostId())) {
                             jobActivity.setIsActive(true);
                             exist = true;
                             break;
                         }
                     }
-                    for (JobSeekerSave jobSeekerSave : jobSeekerSaveList){
-                        if (Objects.equals(jobActivity.getJobPostId(), jobSeekerSave.getJob().getJobPostId())){
+
+                    for (JobSeekerSave jobSeekerSave : jobSeekerSaveList) {
+                        if (Objects.equals(jobActivity.getJobPostId(), jobSeekerSave.getJob().getJobPostId())) {
                             jobActivity.setIsSaved(true);
-                            saved=true;
+                            saved = true;
                             break;
                         }
                     }
 
-                    if(!exist){
+                    if (!exist) {
                         jobActivity.setIsActive(false);
                     }
-                    if(!saved){
+                    if (!saved) {
                         jobActivity.setIsSaved(false);
                     }
 
                     model.addAttribute("jobPost", jobPost);
+
                 }
             }
         }
@@ -159,10 +164,11 @@ public class JobPostActivityController {
 
         return "dashboard";
     }
+
     @GetMapping("/dashboard/add")
     public String addJobs(Model model) {
         model.addAttribute("jobPostActivity", new JobPostActivity());
-        model.addAttribute("users", usersService.getCurrentUserProfile());
+        model.addAttribute("user", usersService.getCurrentUserProfile());
         return "add-jobs";
     }
 
@@ -176,15 +182,15 @@ public class JobPostActivityController {
         jobPostActivity.setPostedDate(new Date());
         model.addAttribute("jobPostActivity", jobPostActivity);
         JobPostActivity saved = jobPostActivityService.addNew(jobPostActivity);
-        return "redirect:/dashboard";
+        return "redirect:/dashboard/";
     }
 
-    @PostMapping("/dashboard/edit/{id}")
+    @GetMapping("dashboard/edit/{id}")
     public String editJob(@PathVariable("id") int id, Model model) {
 
         JobPostActivity jobPostActivity = jobPostActivityService.getOne(id);
         model.addAttribute("jobPostActivity", jobPostActivity);
-        model.addAttribute("users", usersService.getCurrentUserProfile());
+        model.addAttribute("user", usersService.getCurrentUserProfile());
         return "add-jobs";
     }
 }
