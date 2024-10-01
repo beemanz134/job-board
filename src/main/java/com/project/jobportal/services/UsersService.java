@@ -60,11 +60,9 @@ public class UsersService {
             Users users = usersRepository.findByEmail(username).orElseThrow(()-> new UsernameNotFoundException("Could not found " + "user"));
             int userId = users.getUserId();
             if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("Recruiter"))) {
-                RecruiterProfile recruiterProfile = recruiterProfileRepository.findById(userId).orElse(new RecruiterProfile());
-                return recruiterProfile;
+                return recruiterProfileRepository.findById(userId).orElse(new RecruiterProfile());
             } else {
-                JobSeekerProfile jobSeekerProfile = jobSeekerProfileRepository.findById(userId).orElse(new JobSeekerProfile());
-                return jobSeekerProfile;
+                return jobSeekerProfileRepository.findById(userId).orElse(new JobSeekerProfile());
             }
         }
 
@@ -85,5 +83,9 @@ public class UsersService {
 
     public Optional<Users> getUserByEmail(String email) {
         return usersRepository.findByEmail(email);
+    }
+
+    public Users findByEmail(String currentUsername) {
+        return usersRepository.findByEmail(currentUsername).orElseThrow(() -> new UsernameNotFoundException("Could not found " + "user"));
     }
 }
